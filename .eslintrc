@@ -1,0 +1,52 @@
+{
+	"parser": "babel-eslint",
+	"extends": [
+		"standard"
+	],
+	"plugins": [
+		"babel",
+		"promise"
+	],
+	"ecmaFeatures": {
+		"impliedStrict": true
+	},
+	"rules": {
+		"eqeqeq": 1,
+		"no-unused-vars": 1,
+		"no-shadow": 2,
+		"curly": 2,
+		"no-use-before-define": [2, "nofunc"],
+		"no-empty": 1,
+		"no-cond-assign": 2,
+		"no-undef": 2,
+
+		"max-len": [2, 120],
+		"indent": [2, "tab", {
+			"SwitchCase": 1
+		}],
+		"no-tabs": 0,
+		"no-multi-spaces": 2,
+		"comma-dangle": [2, "never"],
+		"no-extra-semi": 1,
+		"semi": [2, "always"],
+		"comma-spacing": [1, {
+			"before": false,
+			"after": true
+		}],
+		"operator-linebreak": 0,
+		"object-curly-spacing": [2, "always"],
+		"key-spacing": 0,
+		"space-before-blocks": 2
+	},
+	"env": {
+		"node": true,
+		"browser": true,
+		"es6": true
+	},
+	"globals": {
+		"__DEV__": false,
+		"__TEST__": false,
+		"__PROD__": false,
+		"__COVERAGE__": false
+	}
+}
