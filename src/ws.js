@@ -16,13 +16,15 @@ export default () => {
 	ws.onmessage = (e) => {
 		const dv = new DataView(e.data);
 
-		const numVals = dv.byteLength / 2;
+		const byteSize = 4;
+		const numVals = dv.byteLength / byteSize;
 
 		const vals = [];
-		for (let i = 0; i < numVals; i += 2) {
+		for (let i = 0; i < numVals; i += 3) {
 			vals.push({
-				x: dv.getInt16(i * 2, true),
-				y: dv.getInt16((i + 1) * 2, true)
+				x: dv.getInt32(i * byteSize, true),
+				y: dv.getInt32((i + 1) * byteSize, true),
+				color: dv.getInt32((i + 2) * byteSize, true)
 			});
 		}
 
