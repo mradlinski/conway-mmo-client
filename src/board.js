@@ -47,7 +47,22 @@ function Board (renderer, ws) {
 
 		this.stage.scale.x = this.stage.scale.y = Math.max(ratioX, ratioY);
 
+		this.constrainMapToScreen();
 		this.render();
+	};
+
+	this.constrainMapToScreen = () => {
+		if (this.stage.x > 0) {
+			this.stage.x = 0;
+		} else if (this.stage.x < window.innerWidth - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.x)) {
+			this.stage.x = window.innerWidth - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.x);
+		}
+
+		if (this.stage.y > 0) {
+			this.stage.y = 0;
+		} else if (this.stage.y < window.innerHeight - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.y)) {
+			this.stage.y = window.innerHeight - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.y);
+		}
 	};
 
 	this.setupStageInteractions = () => {
@@ -67,7 +82,8 @@ function Board (renderer, ws) {
 		this.stage.on('pointermove', (e) => {
 			if (pressed) {
 				const {
-					x, y
+					x,
+					y
 				} = e.data.global;
 
 				const diffX = (x - lastPos.x) * 1;
@@ -76,12 +92,15 @@ function Board (renderer, ws) {
 				totalDiff += Math.abs(diffX) + Math.abs(diffY);
 
 				lastPos = {
-					x, y
+					x,
+					y
 				};
 
 				if (totalDiff >= CONSTS.DRAG_THRESHOLD) {
 					this.stage.x += diffX;
 					this.stage.y += diffY;
+
+					this.constrainMapToScreen();
 
 					this.render();
 				}
@@ -161,7 +180,6 @@ function Board (renderer, ws) {
 		this.stage.addChild(grid);
 	};
 
-
 	const tempPoints = new PIXI.Graphics();
 	this.drawTempPoints = (filled) => {
 		for (let i = 0, len = filled.length; i < len; ++i) {
@@ -192,7 +210,6 @@ function Board (renderer, ws) {
 		this.render();
 	};
 	this.stage.addChild(points);
-
 }
 
 export default Board;
