@@ -1,5 +1,6 @@
 const PIXI = require('pixi.js');
 import CONSTS from './consts';
+import Brushes from './brushes';
 
 function Board (renderer, ws) {
 	this.renderer = renderer;
@@ -14,6 +15,11 @@ function Board (renderer, ws) {
 
 		this.drawBackground();
 		this.drawGrid();
+
+		this.brushPoints = new PIXI.Graphics();
+		this.livingPoints = new PIXI.Graphics();
+		this.stage.addChild(this.brushPoints);
+		this.stage.addChild(this.livingPoints);
 
 		this.render();
 	};
@@ -76,7 +82,6 @@ function Board (renderer, ws) {
 			pressed = true;
 
 			lastPos = e.data.global;
-			console.log(lastPos);
 		});
 
 		this.stage.on('pointermove', (e) => {
@@ -126,32 +131,13 @@ function Board (renderer, ws) {
 			y: Math.floor(coords.y / CONSTS.GRID_SIZE)
 		};
 
-		const cells = Array.apply(null, Array(8))
-			.map(() => {
-				return Array.apply(null, Array(8))
-					.map(() => 0);
-			});
+		const currentBrush = Brushes.getCurrentBrush();
 
-		cells[0][2] = cells[1][2] = cells[2][2] = cells[2][1] = cells[1][0] = 1;
-
-		const points = [];
-		cells.forEach((cc, i) => {
-			cc.forEach((c, j) => {
-				if (c) {
-					points.push({
-						x: gridCoords.x + i,
-						y: gridCoords.y + j,
-						color: 0xDDDDDD
-					});
-				}
-			});
-		});
-
-		this.drawTempPoints(points);
+		this.drawBrushPoints(gridCoords.x, gridCoords.y, currentBrush);
 
 		ws.send(JSON.stringify({
 			coords: gridCoords,
-			cells
+			cells: currentBrush
 		}));
 	};
 
@@ -180,36 +166,44 @@ function Board (renderer, ws) {
 		this.stage.addChild(grid);
 	};
 
-	const tempPoints = new PIXI.Graphics();
-	this.drawTempPoints = (filled) => {
-		for (let i = 0, len = filled.length; i < len; ++i) {
-			var x = filled[i].x;
-			var y = filled[i].y;
-			tempPoints.beginFill(filled[i].color, 0.9);
-			tempPoints.drawRect(x * CONSTS.GRID_SIZE, y * CONSTS.GRID_SIZE, CONSTS.GRID_SIZE, CONSTS.GRID_SIZE);
-			tempPoints.endFill();
-		}
+	this.drawPoints = (gfx, points) => {
+		points.forEach((pt) => {
+			var x = pt.x;
+			var y = pt.y;
+			gfx.beginFill(pt.color, 0.9);
+			gfx.drawRect(x * CONSTS.GRID_SIZE, y * CONSTS.GRID_SIZE, CONSTS.GRID_SIZE, CONSTS.GRID_SIZE);
+			gfx.endFill();
+		});
 
 		this.render();
 	};
-	this.stage.addChild(tempPoints);
+
+	this.drawBrushPoints = (x, y, brush) => {
+		const pts = [];
+
+		brush.forEach((row, i) => {
+			row.forEach((cell, j) => {
+				if (cell !== 0) {
+					pts.push({
+						x: x + i,
+						y: y + j,
+						color: 0xDDDDDD
+					});
+				}
+			});
+		});
+
+		this.drawPoints(this.brushPoints, pts);
+	};
 
 	const points = new PIXI.Graphics();
-	this.drawPoints = window.drawPoints = (filled) => {
-		points.clear();
-		tempPoints.clear();
-
-		for (let i = 0, len = filled.length; i < len; ++i) {
-			var x = filled[i].x;
-			var y = filled[i].y;
-			points.beginFill(filled[i].color, 0.9);
-			points.drawRect(x * CONSTS.GRID_SIZE, y * CONSTS.GRID_SIZE, CONSTS.GRID_SIZE, CONSTS.GRID_SIZE);
-			points.endFill();
-		}
-
-		this.render();
-	};
 	this.stage.addChild(points);
+	this.drawLivingPoints = window.drawPoints = (pts) => {
+		this.livingPoints.clear();
+		this.brushPoints.clear();
+
+		this.drawPoints(this.livingPoints, pts);
+	};
 }
 
 export default Board;
