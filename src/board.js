@@ -1,16 +1,14 @@
 const PIXI = require('pixi.js');
 import CONSTS from './consts';
-import Brushes from './brushes';
 
-function Board (renderer, ws) {
-	this.renderer = renderer;
-	this.stage = new PIXI.Container();
+class Board {
+	constructor (renderer) {
+		this.renderer = renderer;
+		this.stage = new PIXI.Container();
 
-	this.init = () => {
-		window.addEventListener('resize', this.resize);
+		this.rerenderRequested = false;
 
-		this.resize();
-
+		this.stageClickListener = () => {};
 		this.setupStageInteractions();
 
 		this.drawBackground();
@@ -21,32 +19,33 @@ function Board (renderer, ws) {
 		this.stage.addChild(this.brushPoints);
 		this.stage.addChild(this.livingPoints);
 
+		window.addEventListener('resize', () => this.resize());
+
+		this.resize();
+
 		this.render();
-	};
+	}
 
-	this.render = (() => {
-		let rerenderRequested = false;
-		return () => {
-			if (rerenderRequested) {
-				return;
-			}
+	render () {
+		if (this.rerenderRequested) {
+			return;
+		}
 
-			rerenderRequested = true;
-			requestAnimationFrame(() => {
-				rerenderRequested = false;
-				renderer.render(this.stage);
-			});
-		};
-	})();
+		this.rerenderRequested = true;
+		requestAnimationFrame(() => {
+			this.rerenderRequested = false;
+			this.renderer.render(this.stage);
+		});
+	}
 
-	this.resize = () => {
+	resize () {
 		const w = window.innerWidth;
 		const h = window.innerHeight;
 
-		renderer.view.style.width = `${w}px`;
-		renderer.view.style.height = `${h}px`;
+		this.renderer.view.style.width = `${w}px`;
+		this.renderer.view.style.height = `${h}px`;
 
-		renderer.resize(w, h);
+		this.renderer.resize(w, h);
 
 		const ratioX = w / (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);
 		const ratioY = h / (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);
@@ -55,9 +54,9 @@ function Board (renderer, ws) {
 
 		this.constrainMapToScreen();
 		this.render();
-	};
+	}
 
-	this.constrainMapToScreen = () => {
+	constrainMapToScreen () {
 		if (this.stage.x > 0) {
 			this.stage.x = 0;
 		} else if (this.stage.x < window.innerWidth - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.x)) {
@@ -69,9 +68,9 @@ function Board (renderer, ws) {
 		} else if (this.stage.y < window.innerHeight - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.y)) {
 			this.stage.y = window.innerHeight - (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE * this.stage.scale.y);
 		}
-	};
+	}
 
-	this.setupStageInteractions = () => {
+	setupStageInteractions () {
 		this.stage.interactive = true;
 
 		let pressed = false;
@@ -121,9 +120,13 @@ function Board (renderer, ws) {
 			lastPos = null;
 			totalDiff = 0;
 		});
-	};
+	}
 
-	this.onStageClick = (e) => {
+	setStageClickListener (fn) {
+		this.stageClickListener = fn;
+	}
+
+	onStageClick (e) {
 		const coords = e.data.getLocalPosition(this.stage);
 
 		const gridCoords = {
@@ -131,26 +134,19 @@ function Board (renderer, ws) {
 			y: Math.floor(coords.y / CONSTS.GRID_SIZE)
 		};
 
-		const currentBrush = Brushes.getCurrentBrush();
+		this.stageClickListener(gridCoords);
+	}
 
-		this.drawBrushPoints(gridCoords.x, gridCoords.y, currentBrush);
-
-		ws.send(JSON.stringify({
-			coords: gridCoords,
-			cells: currentBrush
-		}));
-	};
-
-	this.drawBackground = () => {
+	drawBackground () {
 		const bg = new PIXI.Graphics();
 		bg.beginFill(255, 0.05);
 		bg.drawRect(0, 0, CONSTS.GAME_SIZE * CONSTS.GRID_SIZE, CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);
 		bg.endFill();
 
 		this.stage.addChild(bg);
-	};
+	}
 
-	this.drawGrid = () => {
+	drawGrid () {
 		const grid = new PIXI.Graphics();
 
 		grid.lineStyle(1, 0, 0.05);
@@ -164,9 +160,9 @@ function Board (renderer, ws) {
 		}
 
 		this.stage.addChild(grid);
-	};
+	}
 
-	this.drawPoints = (gfx, points) => {
+	drawPoints (gfx, points) {
 		points.forEach((pt) => {
 			var x = pt.x;
 			var y = pt.y;
@@ -176,9 +172,9 @@ function Board (renderer, ws) {
 		});
 
 		this.render();
-	};
+	}
 
-	this.drawBrushPoints = (x, y, brush) => {
+	drawBrushPoints (x, y, brush) {
 		const pts = [];
 
 		brush.forEach((row, i) => {
@@ -194,16 +190,14 @@ function Board (renderer, ws) {
 		});
 
 		this.drawPoints(this.brushPoints, pts);
-	};
+	}
 
-	const points = new PIXI.Graphics();
-	this.stage.addChild(points);
-	this.drawLivingPoints = window.drawPoints = (pts) => {
+	drawLivingPoints (pts) {
 		this.livingPoints.clear();
 		this.brushPoints.clear();
 
 		this.drawPoints(this.livingPoints, pts);
-	};
+	}
 }
 
 export default Board;

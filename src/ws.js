@@ -1,40 +1,46 @@
-export default () => {
-	const ws = new WebSocket('ws://localhost:8000/connect');
-	ws.binaryType = 'arraybuffer';
+export default class GameServer {
+	constructor () {
+		this.ws = new WebSocket('ws://localhost:8000/connect');
+		this.ws.binaryType = 'arraybuffer';
 
-	let closed = false;
+		this.msgListener = () => {};
 
-	ws.onopen = () => {
-		console.log('ONOPEN');
-	};
+		this.ws.onopen = () => {
+			console.log('ONOPEN');
+		};
 
-	ws.onclose = () => {
-		console.log('ONCLOSE');
-		closed = true;
-	};
+		this.ws.onclose = () => {
+			console.log('ONCLOSE');
+		};
 
-	ws.onmessage = (e) => {
-		const dv = new DataView(e.data);
+		this.ws.onmessage = (e) => {
+			const dv = new DataView(e.data);
 
-		const byteSize = 4;
-		const numVals = dv.byteLength / byteSize;
+			const byteSize = 4;
+			const numVals = dv.byteLength / byteSize;
 
-		const vals = [];
-		for (let i = 0; i < numVals; i += 3) {
-			vals.push({
-				x: dv.getInt32(i * byteSize, true),
-				y: dv.getInt32((i + 1) * byteSize, true),
-				color: dv.getInt32((i + 2) * byteSize, true)
-			});
-		}
+			const vals = [];
+			for (let i = 0; i < numVals; i += 3) {
+				vals.push({
+					x: dv.getInt32(i * byteSize, true),
+					y: dv.getInt32((i + 1) * byteSize, true),
+					color: dv.getInt32((i + 2) * byteSize, true)
+				});
+			}
 
-		window.drawPoints(vals);
-	};
+			this.msgListener(vals);
+		};
 
-	ws.onerror = (e) => {
-		console.error(e);
-		closed = true;
-	};
+		this.ws.onerror = (e) => {
+			console.error(e);
+		};
+	}
 
-	return ws;
-};
+	setMessageListener (fn) {
+		this.msgListener = fn;
+	}
+
+	send (data) {
+		this.ws.send(data);
+	}
+}
