@@ -15,7 +15,7 @@ document.body.appendChild(renderer.view);
 
 const brushPicker = new BrushPicker(
 	document.getElementById('palette-button'),
-	document.getElementById('palette'),
+	document.getElementById('palette-container'),
 	document.getElementById('palette-overlay')
 );
 const board = new Board(renderer);

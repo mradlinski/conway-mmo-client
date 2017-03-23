@@ -2,22 +2,24 @@ import _ from 'lodash';
 import Brushes from './brushes';
 
 const BRUSH_PALETTE_TEMPLATE = window.doT.template(`
-{{~it.brushes :val:idx}}
-	<div>
-		<div class="brush-container">
-			{{~val :row}}
-				<div>
-					<div class="brush-row">
-						{{~row :cell}}
-							<div class="brush-cell" style="{{? cell === 1}} background-color: black;{{?}}">
-							</div>
-						{{~}}
+<div id="palette" class="palette">
+	{{~it.brushes :val:idx}}
+		<div>
+			<div class="brush-container">
+				{{~val :row}}
+					<div>
+						<div class="brush-row">
+							{{~row :cell}}
+								<div class="brush-cell" style="{{? cell === 1}} background-color: black;{{?}}">
+								</div>
+							{{~}}
+						</div>
 					</div>
-				</div>
-			{{~}}
+				{{~}}
+			</div>
 		</div>
-	</div>
-{{~}}
+	{{~}}
+</div>
 `);
 
 class BrushPicker {
@@ -31,7 +33,8 @@ class BrushPicker {
 
 		this.renderBrushPalette();
 
-		this.brushPaletteButton.onclick = () => this.toggleBrushPalette();
+		this.brushPaletteButton.onclick = () => this.showBrushPalette();
+		this.brushPaletteOverlay.onclick = () => this.hideBrushPalette();
 	}
 
 	renderBrushPalette () {
