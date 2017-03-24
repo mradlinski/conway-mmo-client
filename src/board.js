@@ -47,8 +47,8 @@ class Board {
 
 		this.renderer.resize(w, h);
 
-		const ratioX = w / (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);
-		const ratioY = h / (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);
+		const ratioX = w / (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE) * CONSTS.DEFAULT_ZOOM;
+		const ratioY = h / (CONSTS.GAME_SIZE * CONSTS.GRID_SIZE) * CONSTS.DEFAULT_ZOOM;
 
 		this.stage.scale.x = this.stage.scale.y = Math.max(ratioX, ratioY);
 
@@ -139,7 +139,7 @@ class Board {
 
 	drawBackground () {
 		const bg = new PIXI.Graphics();
-		bg.beginFill(255, 0.05);
+		bg.beginFill(0x111111, 0.8);
 		bg.drawRect(0, 0, CONSTS.GAME_SIZE * CONSTS.GRID_SIZE, CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);
 		bg.endFill();
 
@@ -149,7 +149,7 @@ class Board {
 	drawGrid () {
 		const grid = new PIXI.Graphics();
 
-		grid.lineStyle(1, 0, 0.05);
+		grid.lineStyle(1, 0xFFFFFF, 0.05);
 
 		for (let x = 0, xSize = CONSTS.GAME_SIZE; x < xSize; ++x) {
 			grid.drawRect(x * CONSTS.GRID_SIZE, 0, 0, CONSTS.GAME_SIZE * CONSTS.GRID_SIZE);

@@ -6,12 +6,11 @@ import BrushPicker from './brushPicker';
 const ws = new WS();
 
 const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {
+	view: document.getElementById('board'),
 	autoResize: true,
 	transparent: true,
 	resolution: 1
 });
-
-document.body.appendChild(renderer.view);
 
 const brushPicker = new BrushPicker(
 	document.getElementById('palette-toggle-button'),

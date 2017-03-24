@@ -38,7 +38,9 @@ class BrushPicker {
 
 		this.renderBrushPalette();
 
-		this.togglePaletteButton.onclick = () => this.showBrushPalette();
+		this.togglePaletteButton.onclick = (e) => {
+			this.showBrushPalette();
+		};
 	}
 
 	renderBrushPalette () {
@@ -51,10 +53,12 @@ class BrushPicker {
 		this.brushPaletteShown = false;
 
 		this.paletteControl.getElementsByClassName('palette-overlay')[0]
-			.onclick = () => this.hideBrushPalette();
+			.onclick = (e) => {
+				this.hideBrushPalette();
+			};
 
 		this.paletteControl.getElementsByClassName('palette-rotate-button')[0]
-			.onclick = () => {
+			.onclick = (e) => {
 				Brushes.rotateRight();
 				this.renderBrushPalette();
 			};
@@ -62,7 +66,7 @@ class BrushPicker {
 		_.forEach(
 			this.paletteControl.getElementsByClassName('brush-container'),
 			(b, idx) => {
-				b.onclick = () => {
+				b.onclick = (e) => {
 					this.setCurrentBrush(idx);
 					this.hideBrushPalette();
 				};
