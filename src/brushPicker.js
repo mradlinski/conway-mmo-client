@@ -2,50 +2,65 @@ import _ from 'lodash';
 import Brushes from './brushes';
 
 const BRUSH_PALETTE_TEMPLATE = window.doT.template(`
-<div id="palette" class="palette">
-	{{~it.brushes :val:idx}}
-		<div>
-			<div class="brush-container">
-				{{~val :row}}
-					<div>
-						<div class="brush-row">
-							{{~row :cell}}
-								<div class="brush-cell" style="{{? cell === 1}} background-color: black;{{?}}">
-								</div>
-							{{~}}
+<div class="palette-overlay"></div>
+<div class="palette-container">
+	<div class="palette-rotate-button fa-stack fa-2x palette-button">
+		<i class="fa fa-circle fa-stack-2x palette-button-bg"></i>
+		<i class="fa fa-repeat fa-stack-1x"></i>
+	</div>
+	<div class="palette">
+		{{~it.brushes :val:idx}}
+			<div>
+				<div class="brush-container">
+					{{~val :row}}
+						<div>
+							<div class="brush-row">
+								{{~row :cell}}
+									<div class="brush-cell" style="{{? cell === 1}} background-color: black;{{?}}">
+									</div>
+								{{~}}
+							</div>
 						</div>
-					</div>
-				{{~}}
+					{{~}}
+				</div>
 			</div>
-		</div>
-	{{~}}
+		{{~}}
+	</div>
 </div>
 `);
 
 class BrushPicker {
-	constructor (button, palette, overlay) {
+	constructor (button, paletteControl) {
 		this.currentBrushIdx = 0;
 
-		this.brushPaletteButton = button;
-		this.brushPaletteContainer = palette;
-		this.brushPaletteOverlay = overlay;
-		this.brushPaletteShown = false;
+		this.togglePaletteButton = button;
+		this.paletteControl = paletteControl;
 
 		this.renderBrushPalette();
 
-		this.brushPaletteButton.onclick = () => this.showBrushPalette();
-		this.brushPaletteOverlay.onclick = () => this.hideBrushPalette();
+		this.togglePaletteButton.onclick = () => this.showBrushPalette();
 	}
 
 	renderBrushPalette () {
 		const html = BRUSH_PALETTE_TEMPLATE({
 			currentBrush: this.currentBrushIdx,
-			brushes: Brushes
+			brushes: Brushes.list
 		});
-		this.brushPaletteContainer.innerHTML = html;
+		this.paletteControl.innerHTML = html;
+
+		this.brushPaletteShown = false;
+
+		this.paletteControl.getElementsByClassName('palette-overlay')[0]
+			.onclick = () => this.hideBrushPalette();
+
+		this.paletteControl.getElementsByClassName('palette-rotate-button')[0]
+			.onclick = () => {
+				Brushes.rotateRight();
+				this.renderBrushPalette();
+			};
 
 		_.forEach(
-			this.brushPaletteContainer.getElementsByClassName('brush-container'),
+			this.paletteControl.getElementsByClassName('brush-container'),
 			(b, idx) => {
 				b.onclick = () => {
 					this.setCurrentBrush(idx);
@@ -63,26 +78,22 @@ class BrushPicker {
 	}
 
 	showBrushPalette () {
-		this.brushPaletteContainer.classList.remove('invisible');
-		this.brushPaletteContainer.classList.remove('slide-out');
-		this.brushPaletteContainer.classList.add('slide-in');
+		this.paletteControl.classList.remove('invisible');
+		this.paletteControl.classList.remove('slide-out');
+		this.paletteControl.classList.add('slide-in');
 
-		this.brushPaletteButton.classList.remove('roll-in');
-		this.brushPaletteButton.classList.add('roll-out');
-
-		this.brushPaletteOverlay.classList.remove('invisible');
+		this.togglePaletteButton.classList.remove('roll-in');
+		this.togglePaletteButton.classList.add('roll-out');
 
 		this.brushPaletteShown = true;
 	}
 
 	hideBrushPalette () {
-		this.brushPaletteContainer.classList.remove('slide-in');
-		this.brushPaletteContainer.classList.add('slide-out');
+		this.paletteControl.classList.remove('slide-in');
+		this.paletteControl.classList.add('slide-out');
 
-		this.brushPaletteButton.classList.remove('roll-out');
-		this.brushPaletteButton.classList.add('roll-in');
-
-		this.brushPaletteOverlay.classList.add('invisible');
+		this.togglePaletteButton.classList.remove('roll-out');
+		this.togglePaletteButton.classList.add('roll-in');
 
 		this.brushPaletteShown = false;
 	}
@@ -92,7 +103,7 @@ class BrushPicker {
 	}
 
 	getCurrentBrush () {
-		return Brushes[this.currentBrushIdx];
+		return Brushes.list[this.currentBrushIdx];
 	}
 }
 

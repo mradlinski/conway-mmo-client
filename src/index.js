@@ -14,9 +14,8 @@ const renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, 
 document.body.appendChild(renderer.view);
 
 const brushPicker = new BrushPicker(
-	document.getElementById('palette-button'),
-	document.getElementById('palette-container'),
-	document.getElementById('palette-overlay')
+	document.getElementById('palette-toggle-button'),
+	document.getElementById('palette-controls')
 );
 const board = new Board(renderer);
 board.setStageClickListener((coords) => {
